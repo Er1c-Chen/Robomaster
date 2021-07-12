@@ -14,7 +14,13 @@ img = cv2.imread('img.jpg')
 cap = cv2.VideoCapture()
 cap.open('red.avi')
 
-clf = KNeighborsClassifier()
+# clf = KNeighborsClassifier()
+
+class distanceClassifier():
+    def cls(self, x):
+        cv2.imread('true.jpg')
+
+        np.ndarray.flatten(x)
 
 while cap.isOpened():
     ret, img = cap.read()
@@ -36,9 +42,9 @@ while cap.isOpened():
     if len(contours) > 0:
         for i, cnt in enumerate(contours):
             rect = cv2.minAreaRect(cnt)
-            h = rect[1][0]
-            w = rect[1][1]
-            area = h * w
+            width = rect[1][0]
+            height = rect[1][1]
+            area = height * width
             if 8000 < area < 12000:
                 box = cv2.boxPoints(rect)
                 box = np.int0(box)
@@ -46,25 +52,22 @@ while cap.isOpened():
                 right_point_x = int(np.max(box[:, 0]))
                 top_point_y = int(np.min(box[:, 1]))
                 bottom_point_y = int(np.max(box[:, 1]))
-                width = right_point_x - left_point_x
-                height = bottom_point_y - top_point_y
-                if height < width:
-                    height, width = width, height
-                    # top_point_y, bottom_point_y = bottom_point_y, top_point_y
-                    # left_point_x, right_point_x = right_point_x, left_point_x
-                print(width, height)
                 cropImg = prepro[top_point_y:bottom_point_y, left_point_x:right_point_x]
 
                 src = np.float32([box[0], box[1], box[2], box[3]])
                 dst = np.float32([[0, height], [0, 0], [width, 0],  [width, height]])
                 trans = cv2.getPerspectiveTransform(src, dst)
-                target = cv2.warpPerspective(prepro, trans, (width, height))
-                cv2.imshow('trans', target)
-                cv2.imwrite('fake.jpg', target)
+                afterTrans = cv2.warpPerspective(prepro, trans, (int(width), int(height)))
+
+                if height < width:
+                    height, width = width, height
+                    trans_img = cv2.transpose(afterTrans)
+                    target = cv2.flip(trans_img, 1)
+                # label =
                 cv2.drawContours(img, [box], 0, (0, 255, 0), 2)
 
 
     cv2.imshow(winname, img)
     # cv2.imshow(winname1, ret)
-    cv2.waitKey(5)
+    cv2.waitKey(3)
 cv2.destroyAllWindows()
